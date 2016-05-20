@@ -1,0 +1,233 @@
+;;;; CZ3005 2015 Semester 2: Lab 1 (Total Marks: 100)
+;;;;
+;;;; Due two weeks from the lab.
+;;;;
+;;;; Submission procedure will be announced during the lecture or the
+;;;; lab session.
+;;;;
+;;;; This file is a loadable Lisp file.  You are to modify this file and
+;;;; add your answers.  Then CHECK TO MAKE SURE that the file still loads
+;;;; properly into the Lisp system.
+;;;;
+;;;; Name your lab 1 lisp code as  "LAB1-<YOUR_MATRICULATION_NUMBER>.lisp"
+;;;;
+;;;; Any line breaks due to word wrapping will be treated as errors.
+;;;; Moral of the story: DO NOT USE WINDOWS NOTEPAD OR PICO.
+;;;;
+;;;; Before you submit your code, be sure to test it in GNU CLISP 2.49.
+;;;; Lispworks 6.1 software installed on NTU machines is based on Clisp 2.49,
+;;;; so if your code works there, it qualifies.
+;;;;
+;;;; If we cannot run your code, including our automatic checker, your answer
+;;;; will not be considered at all. If our checker detects wrong output, you may
+;;;; still get partial marks for such problem.
+;;;;
+;;;; You are NOT allowed to use any external libraries!
+;;;;
+;;;; There are FIVE questions in this homework assignment.  If your answer
+;;;; is supposed to be computer code, you should type the code directly
+;;;; in this file (the file is a loadable Lisp file). There are function
+;;;; definitions provided, where you are expected to write your answer.
+;;;;  If your answer is supposed to be textual, you should provide it as a
+;;;; Lisp comment.
+;;;;
+;;;; COMMENT EXCESSIVELY -- 20% of marks for every task is awarded solely based
+;;;; on sufficiently commented code! Comment both inline in your code and
+;;;; comment each function and structure you write. Make sure we understand
+;;;; the nitty-gritty of you answers.
+
+
+
+
+
+;;;; QUESTION 1 [10 marks]
+
+;;; What is printed and returned by the following expressions, and why?
+
+(sqrt (- (+ 1/2 1/3 1/6)))
+; #C(0.0 1.0) because expression is evaluated to -1 and complex forms in 
+; LISP are expressed as #C(real_part imaginary_part). Since the square root of -1 is j, it is expressed as #C(0.0 1.0) in LISP
+ 
+(quote (sqrt (- (+ 1/2 1/3 1/6))))
+; (SQRT (- (+ 1/2 1/3 1/6)))
+; Using quote bypasses the default evaluation rules and does not evaluate the expression,
+; passing it along to the function exactly as typed.
+
+'(sqrt (- (+ 1/2 1/3 1/6)))
+; (SQRT (- (+ 1/2 1/3 1/6)))
+; Similarly, passing an expression inside the ' will bypass evaluation of expression and
+; print the expression as typed.
+
+;;; [I commented this out so that the file would load, but you should
+;;; uncomment it and see what it does so you can explain it ]
+
+;;   (sqrt (quote (- (+ 1/2 1/3 1/6))))
+; Error: In SQRT of ((- (+ 1/2 1/3 1/6))) arguments should be of type NUMB;
+; The above expression will throw an error because the argument inside sqrt is a quote.
+; In other words, since quote() is not a numeric value, it can not be evaluated by sqrt.
+
+
+(print (sqrt (- (+ 1/2 1/3 1/6))))
+; #C(0.0 1.0) 
+; #C(0.0 1.0)
+; The print function prints its argument and then returns it. In the above expression, the argument of print will
+; first be evaluated to the square root of -1, which is printed and then returned by the print function.
+
+
+
+
+;;;;; QUESTION 2 [10 marks for each expression, 20 marks total]
+
+;;; Create Lisp expressions which perform the same function as the
+;;; following C expressions:
+;;; If you do not know C/C++, please refer to the programming manual.
+
+;;; a + b * c - d
+
+(- (+ a (* b c)) d) ; write the expression here
+
+;;; if (a==b)
+;;; {
+;;;     return max(4 * 3 + cos(2.1),  7 / log(1.2));
+;;; }
+;;; else
+;;; {
+;;;     return exp(abs (a-b) * (3 % a))
+;;; }
+
+(if (= a b)
+    (max (+ (* 4 3) (cos 2.1)) (/ 7 (log 1.2)))
+    (exp (* (abs (- a b)) (mod 3 a))))
+
+; write the expression here
+
+
+
+;;;;; QUESTION 3  [10 marks for riddle, 20 marks for enigma]
+
+;;; What do the following functions do?  I'm looking for BOTH a specific
+;;; description of the operation of the function AND some insight
+;;; into what purpose you'd use it for.
+
+;;; Function 1: RIDDLE
+;;; pass in a list for LIS
+;;; example:     (riddle '(a b c d e f g))
+(defun riddle (lis)
+  (if (not (null lis))  ;; if lis is non-empty (it's not NIL)
+      (progn
+        (riddle (rest lis))
+        (print (first lis))))
+  "All Done")
+
+; Purpose: This function prints the characters of the list passed as argument in 
+; the reverse order, with one character in each line.
+; Operation: The function operates recursively on the list, passing all characters except 
+; the first one in each recursive call until the list is exhausted. Then it prints the characters in 
+; reverse order of the function calls. Such a function could be used to trace back the 
+; function calls on a recursive function printing a message for each call.
+
+
+
+
+;;; Function 2: ENIGMA
+
+(defun enigma-h (lis d)
+  "This is a private function and should only be called from ENIGMA"
+  (if (atom lis) 0  ;; if list is an atom return 0
+    (apply #'+ (length lis) d  ;; else- add (length of list+d) to the elements of the list declared in the next line
+      (mapcar #'enigma-h lis                                  ;; apply function enigma-h with one argument each from lis and list returned by make-list
+        (make-list (length lis) :initial-element (+ d 1))))))  ;; make a list with length of lis and all elements = d+1 and pass it as the second argument of enigma-h
+
+(defun enigma (lis)
+  (enigma-h lis 0))
+
+;; Purpose: The above function will return the value of ((length of list+d) + (length of any sublist+(d+1)) + (length of any sub-sublist+(d+2))+...)
+;; Operation: The function enigma takes an object as an argument and calls the enigma-h function passing two arguments : the object and 0.
+;; Inside the enigma-h function, the conditional expression checks if the object is an atom and returns 0.
+;; If the object is a list, then the apply function adds the value of the (length of list+d) to the list declared resulting from mapcar.
+;; In mapcar, the enigma-h function is called recursively iterating over all the elements of the original list and 
+;; a newly created list with the same length but all identical elements of value d+1. 
+;; The above process happens recursively and returns non-zero values only for the list-elements of the original list. These elements are added to
+;; (length of list+d) and the result is then returned.
+
+
+; Example:
+(enigma '(1 2 3 (4 5) 6 7))
+; 9
+(enigma '(defun mystery (n)
+    (+ (if (<= n 1) 0
+         (mystery (1- n)))
+       (/ (if (evenp n) -4 4)
+                  (1- (* 2 n))))))
+; 63
+
+
+
+;;;;; QUESTION 4  [10 marks]
+
+;; A function that returns the sum of the positive numbers less than n from the lab 1
+;; Note that this function uses iteration; But the iteration is not necessary
+;; Write the function sum-rec as a recursive version of sum1.
+
+(defun sum1 (n)
+  (let ((s 0))      
+    (dotimes (i n s)
+      (incf s i))))
+
+(defun sum-rec (n) 
+  (if (= n 0) 0
+    (+ (- n 1) (sum-rec (- n 1)))))
+
+
+
+;;;;; QUESTION 5  [10 marks for each variant, 30 marks total]
+
+;;; Write a function called euclidean-distance, which takes two lists of the same length. These lists represent
+;;; vectors in euclidean space.
+;;;
+;;; https://en.wikipedia.org/wiki/Euclidean_distance
+;;;
+;;; Write this function THREE WAYS:
+;;;
+;;; - Using iteration
+;;; - Using recursion and NO variables (parameters passed in don't
+;;;   count as variables in this context)
+;;; - Using mapping and apply
+;;;
+;;; You are welcome to make subsidiary functions if that would help
+;;; you.  I think the only case where this is needed is in the recursive
+;;; version.
+;;;
+;;; Hints: (null foo) returns true if the expression foo is nil
+;;;
+
+(defun euclidean-distance-it (p q)
+  (let ((s 0))
+  (dotimes(i (length p) s)
+    (setf s (+ s (expt (- (car p) (car q)) 2)))
+    (setf p (cdr p)) 
+    (setf q (cdr q)))
+    (setf s (sqrt s))))
+     
+(defun euclidean-distance-rec (p q &optional s) 
+  (if (null p) 0
+    (setf s (+ (expt (- (car p) (car q)) 2) (euclidean-distance-rec (cdr p) (cdr q))))))
+
+(defun get-dist (p q) 
+  (sqrt (euclidean-distance-rec p q 0))
+
+
+(defun euclidean-distance-map (p q) (sqrt (apply '+ (mapcar #'(lambda (x y) (expt (- x y) 2)) p q))))
+
+
+;;;;; BONUS: [Additional 10 marks for a winner of each of the three ways]
+
+;;; Bonus marks for the students who write a function which,
+;;; when the whole function is passed to the ENIGMA function, returns
+;;; the smallest number.
+
+(defun smallest-number (lis)
+  (let ((s 0))
+  (min (mapcar #'(lambda (x) (enigma (make-list (x) :initial-element (1)))) lis ))))
+
+
